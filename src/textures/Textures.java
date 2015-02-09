@@ -22,6 +22,7 @@ public class Textures {
 		ArrayList<Integer> l = new ArrayList<Integer>();
 		{
 			l.add(load("wall.png"));
+			l.add(load("Bake.png"));
 		}
 		Object[] transfer = l.toArray();
 		texID = new int[transfer.length];

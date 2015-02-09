@@ -19,6 +19,8 @@ import textures.Textures;
 
 public class Render {
 	
+	private static final boolean USE_BACK_FACES = false;
+	
 	private static int fov = 60;
 	
 	private static FBO FBOData, FBOBackFaces, FBORender;
@@ -34,7 +36,8 @@ public class Render {
 		// Load framebuffers
 		FBOData 		= new FBO(Display.getWidth(), Display.getHeight()).withColor(3).withDepth();
 		FBORender 		= new FBO(Display.getWidth(), Display.getHeight()).withColor(3);
-		FBOBackFaces 	= new FBO(Display.getWidth(), Display.getHeight()).withDepthTexture();
+		if (USE_BACK_FACES) 
+			FBOBackFaces 	= new FBO(Display.getWidth(), Display.getHeight()).withDepthTexture();
 		
 		// Put models into vertex array objects
 		VAOArray = VAO.createVAOArray();
@@ -84,8 +87,14 @@ public class Render {
 		setParam1i("texture0", 0);
 		setParam1i("texture1", 1);
 		setParam1i("texture2", 2);
+		setParam1i("useBackFaces", USE_BACK_FACES ? 1 : 0);
 		useMatrix(matrixProj,  "proj");
 		useMatrix(matrixView,  "view");
+		
+		setShader(SHADERBlurPass);
+		setParam1i("texture0", 0);
+		setParam1i("texture1", 1);
+		
 		
 		// Set additional OpenGL states
 		glEnable(GL_DEPTH_TEST);
@@ -94,27 +103,26 @@ public class Render {
 		glClearColor(0, 0, 0, 0);
 	}
 	
-	
 	public static void renderOpenGL() {
 		setFrameBuffer(FBOData);
 		setShader(SHADERSplitter);
 		useMatrix(matrixView, "view");
-		bind(Textures.texID[0], 0);
 		
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		
 		renderScene();
 		
-		
-		setFrameBuffer(FBOBackFaces);
-		setShader(SHADERDepth);
-		useMatrix(matrixView, "view");
-		
-		glClear(GL_DEPTH_BUFFER_BIT);
-		
-		glCullFace(GL_FRONT);
-		renderScene();
-		glCullFace(GL_BACK);
+		if (USE_BACK_FACES) {
+			setFrameBuffer(FBOBackFaces);
+			setShader(SHADERDepth);
+			useMatrix(matrixView, "view");
+			
+			glClear(GL_DEPTH_BUFFER_BIT);
+			
+			glCullFace(GL_FRONT);
+			renderScene();
+			glCullFace(GL_BACK);
+		}
 		
 
 		setFrameBuffer(FBORender);
@@ -128,13 +136,38 @@ public class Render {
 		glEnable(GL_DEPTH_TEST);
 		
 		
-		setFrameBuffer(null);
+		setFrameBuffer(FBOData);
 		setShader(SHADERPost);
 		useMatrix(matrixView, "view");
 		useMatrix(Matrix4f.invert(matrixProj, null), "projInv");
 		bind(FBORender.getTexturesId()[0], 0);
 		bind(FBORender.getTexturesId()[1], 1);
-		bind(FBOBackFaces.getDepthTextureId(), 2);
+		if (USE_BACK_FACES) 
+			bind(FBOBackFaces.getDepthTextureId(), 2);
+
+		glDisable(GL_DEPTH_TEST);
+		VAOArray[0].render();
+		glEnable(GL_DEPTH_TEST);
+
+		
+		setFrameBuffer(FBORender);
+		setShader(SHADERBlurPass);
+		bind(FBOData.getTexturesId()[0], 0);
+		bind(FBOData.getTexturesId()[1], 1);
+		setParam2f("dir", 0, 1);
+		setParam1i("finalPass", 0);
+
+		glDisable(GL_DEPTH_TEST);
+		VAOArray[0].render();
+		glEnable(GL_DEPTH_TEST);
+		
+		
+		setFrameBuffer(null);
+		setShader(SHADERBlurPass);
+		bind(FBORender.getTexturesId()[0], 0);
+		bind(FBORender.getTexturesId()[1], 1);
+		setParam2f("dir", 1, 0);
+		setParam1i("finalPass", 1);
 
 		glDisable(GL_DEPTH_TEST);
 		VAOArray[0].render();
@@ -142,19 +175,20 @@ public class Render {
 	}
 	
 	private static void renderScene() {
+		bind(Textures.texID[0], 0);
 		matrixModel.setIdentity();
-		matrixModel.translate(new Vector3f(0, -1, 0));
-		matrixModel.rotate((float) Deferred.time * 0.1f, new Vector3f(0, 1, 0));
+		matrixModel.translate(new Vector3f(0, -0.5f, 0));
+		matrixModel.rotate((float) Math.PI * -0.5f, new Vector3f(1, 0, 0));
+		matrixModel.scale(new Vector3f(4f, 4f, 4f));
+		useMatrix(matrixModel, "model");
+		VAOArray[0].render();
+
+		bind(Textures.texID[1], 0);
+		matrixModel.setIdentity();
+		matrixModel.rotate((float) Math.cos(Deferred.time * 0.3), new Vector3f(0, 1, 0));
 		matrixModel.scale(new Vector3f(0.2f, 0.2f, 0.2f));
 		useMatrix(matrixModel, "model");
 		VAOArray[1].render();
-		
-		/*matrixModel.setIdentity();
-		matrixModel.translate(new Vector3f(0, -1, 0));
-		matrixModel.rotate((float) -Math.PI / 2, new Vector3f(1, 0, 0));
-		matrixModel.scale(new Vector3f(4, 4, 4));
-		useMatrix(matrixModel, "model");
-		VAOArray[0].render();*/
 	}
 	
 	public static void useMatrix(Matrix4f m, String var) {

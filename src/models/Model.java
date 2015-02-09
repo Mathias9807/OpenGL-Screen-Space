@@ -28,8 +28,7 @@ public class Model implements Runnable {
 	public static void loadModels() {
 		ArrayList<Model> tempArray = new ArrayList<Model>();
 		tempArray.add(new Model(Model.class.getResourceAsStream("/models/plane.obj")));
-		tempArray.add(new Model(Model.class.getResourceAsStream("/models/Pillars.obj")));
-		tempArray.add(new Model(Model.class.getResourceAsStream("/models/room.obj")));
+		tempArray.add(new Model(Model.class.getResourceAsStream("/models/Walther.obj")));
 		models = new Model[tempArray.size()];
 		tempArray.toArray(models);
 	}

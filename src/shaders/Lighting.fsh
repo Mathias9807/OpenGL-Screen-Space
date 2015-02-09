@@ -15,14 +15,14 @@ void main() {
 		 tex1 = texture(texture1, uv_tan);
 	vec3 normal = tex0.rgb;
 	
-	vec3 blinnPhong = vec3(0);
+	vec3 blinnPhong = vec3(tex1.rgb * 0.2);
 	
 	blinnPhong += max(
 		dot(
 			normal, 
 			normalize(vec3(1, 1, 1))
 		), 
-	0) * tex1.rgb;
+	0) * tex1.rgb * 2.5;
 	
     color0 = tex0;
     color1 = vec4(blinnPhong.rgb, tex1.a);

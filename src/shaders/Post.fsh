@@ -1,12 +1,14 @@
 #version 330
 
-layout(location = 0) out vec4 color;
+layout(location = 0) out vec4 color0;
+layout(location = 1) out vec4 color1;
 
 in vec4 vertex_m;
 in vec2 uv_tan;
 
 uniform sampler2D texture0, texture1, texture2;
 uniform mat4 proj, view, projInv;
+uniform bool useBackFaces;
 
 vec4 get3DCoord(vec2 uv);
 
@@ -21,8 +23,11 @@ void main() {
 	
 	vec4 light = normalize(view * vec4(1, 1, 1, 0));
 	float scale = 0.1;
+	float step = 0.5;
+	float length = 20;
 	float shadow = 0;
-	for (float f = 0; f < 20; f += 0.4) {
+	for (float f = 0; f < length; f += step) {
+		float strength = f / 20;
 		vec4 sample_c = frag + light * scale * f;
 		
 		vec4 sample_p = proj * sample_c;
@@ -40,11 +45,13 @@ void main() {
 		
 		float shadowDist = length(sample_c - frag);
 		
-		if (sample_p.z + 0.0001 > geo_depth) shadow += 0.02 * clamp(1 / (shadowDist * shadowDist), 0, 1) * vignette * clamp(1 - 50 * (sample_p.z - geo_depth), 0, 1);
+		if (useBackFaces && sample_p.z + 0.0001 > geo_depth && sample_p.z < geo_far) shadow += 0.5 * strength * clamp(1 / (shadowDist * shadowDist), 0, 1) * vignette;
+		else if (sample_p.z + 0.0001 > geo_depth) shadow += 0.1 * clamp(1 / (shadowDist * shadowDist), 0, 1) * vignette * clamp(1 - 50 * (sample_p.z - geo_depth), 0, 1);
 	}
 	
-    color = vec4(vec3(1) * (1 - shadow), 1);
-    if (depth == 0) color = vec4(1);
+    color0 = vec4(vec3(tex1.rgb), shadow);
+    if (depth == 0) color0 = vec4(0, 0, 0.4, 0);
+    color1 = vec4(max(tex1.rgb - 2, 0), 1);
 }
 
 vec4 get3DCoord(vec2 uv) {
