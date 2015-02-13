@@ -46,7 +46,9 @@ void main() {
 		float shadowDist = length(sample_c - frag);
 		
 		if (useBackFaces && sample_p.z + 0.0001 > geo_depth && sample_p.z < geo_far) shadow += 0.5 * strength * clamp(1 / (shadowDist * shadowDist), 0, 1) * vignette;
-		else if (sample_p.z + 0.0001 > geo_depth) shadow += 0.1 * clamp(1 / (shadowDist * shadowDist), 0, 1) * vignette * clamp(1 - 50 * (sample_p.z - geo_depth), 0, 1);
+		else if (sample_p.z + 0.0001 > geo_depth) {
+			shadow += 0.2 * clamp(1 / (shadowDist * shadowDist), 0, 1) * vignette * clamp(1 - 50 * (sample_p.z - geo_depth), 0, 1);
+		}
 	}
 	
     color0 = vec4(vec3(tex1.rgb), shadow);

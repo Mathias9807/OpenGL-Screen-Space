@@ -23,7 +23,7 @@ public class Render {
 	
 	private static int fov = 60;
 	
-	private static FBO FBOData, FBOBackFaces, FBORender;
+	private static FBO FBOData, FBOBackFaces, FBORender0, FBORender1;
 
 	private static VAO[] VAOArray = new VAO[8];
 	
@@ -35,7 +35,8 @@ public class Render {
 		
 		// Load framebuffers
 		FBOData 		= new FBO(Display.getWidth(), Display.getHeight()).withColor(3).withDepth();
-		FBORender 		= new FBO(Display.getWidth(), Display.getHeight()).withColor(3);
+		FBORender0 		= new FBO(Display.getWidth(), Display.getHeight()).withColor(3);
+		FBORender1 		= new FBO(Display.getWidth(), Display.getHeight()).withColor(3);
 		if (USE_BACK_FACES) 
 			FBOBackFaces 	= new FBO(Display.getWidth(), Display.getHeight()).withDepthTexture();
 		
@@ -80,13 +81,6 @@ public class Render {
 		setShader(SHADERLighting);
 		setParam1i("texture0", 0);
 		setParam1i("texture1", 1);
-		useMatrix(matrixProj,  "proj");
-		useMatrix(matrixView,  "view");
-		
-		setShader(SHADERPost);
-		setParam1i("texture0", 0);
-		setParam1i("texture1", 1);
-		setParam1i("texture2", 2);
 		setParam1i("useBackFaces", USE_BACK_FACES ? 1 : 0);
 		useMatrix(matrixProj,  "proj");
 		useMatrix(matrixView,  "view");
@@ -94,6 +88,10 @@ public class Render {
 		setShader(SHADERBlurPass);
 		setParam1i("texture0", 0);
 		setParam1i("texture1", 1);
+		setParam1i("data0", 3);
+		setParam1i("data1", 4);
+		useMatrix(matrixProj,  "proj");
+		useMatrix(matrixView,  "view");
 		
 		
 		// Set additional OpenGL states
@@ -107,10 +105,10 @@ public class Render {
 		setFrameBuffer(FBOData);
 		setShader(SHADERSplitter);
 		useMatrix(matrixView, "view");
-		
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		
 		renderScene();
+		
 		
 		if (USE_BACK_FACES) {
 			setFrameBuffer(FBOBackFaces);
@@ -125,35 +123,26 @@ public class Render {
 		}
 		
 
-		setFrameBuffer(FBORender);
+		setFrameBuffer(FBORender1);
 		setShader(SHADERLighting);
 		useMatrix(matrixView, "view");
+		useMatrix(Matrix4f.invert(matrixProj, null), "projInv");
 		bind(FBOData.getTexturesId()[0], 0);
 		bind(FBOData.getTexturesId()[1], 1);
-		
-		glDisable(GL_DEPTH_TEST);
-		VAOArray[0].render();
-		glEnable(GL_DEPTH_TEST);
-		
-		
-		setFrameBuffer(FBOData);
-		setShader(SHADERPost);
-		useMatrix(matrixView, "view");
-		useMatrix(Matrix4f.invert(matrixProj, null), "projInv");
-		bind(FBORender.getTexturesId()[0], 0);
-		bind(FBORender.getTexturesId()[1], 1);
 		if (USE_BACK_FACES) 
 			bind(FBOBackFaces.getDepthTextureId(), 2);
-
+		
 		glDisable(GL_DEPTH_TEST);
 		VAOArray[0].render();
 		glEnable(GL_DEPTH_TEST);
 
 		
-		setFrameBuffer(FBORender);
+		setFrameBuffer(FBORender0);
 		setShader(SHADERBlurPass);
-		bind(FBOData.getTexturesId()[0], 0);
-		bind(FBOData.getTexturesId()[1], 1);
+		bind(FBORender1.getTexturesId()[0], 0);
+		bind(FBORender1.getTexturesId()[1], 1);
+		bind(FBOData.getTexturesId()[0], 3);
+		bind(FBOData.getTexturesId()[1], 4);
 		setParam2f("dir", 0, 1);
 		setParam1i("finalPass", 0);
 
@@ -164,8 +153,10 @@ public class Render {
 		
 		setFrameBuffer(null);
 		setShader(SHADERBlurPass);
-		bind(FBORender.getTexturesId()[0], 0);
-		bind(FBORender.getTexturesId()[1], 1);
+		bind(FBORender0.getTexturesId()[0], 0);
+		bind(FBORender0.getTexturesId()[1], 1);
+		bind(FBOData.getTexturesId()[0], 3);
+		bind(FBOData.getTexturesId()[1], 4);
 		setParam2f("dir", 1, 0);
 		setParam1i("finalPass", 1);
 
@@ -183,10 +174,15 @@ public class Render {
 		useMatrix(matrixModel, "model");
 		VAOArray[0].render();
 
-		bind(Textures.texID[1], 0);
+		bind(Textures.texID[0], 0);
 		matrixModel.setIdentity();
-		matrixModel.rotate((float) Math.cos(Deferred.time * 0.3), new Vector3f(0, 1, 0));
-		matrixModel.scale(new Vector3f(0.2f, 0.2f, 0.2f));
+		matrixModel.rotate((float) Math.cos(Deferred.time * 0.8), new Vector3f(1, 0, 0));
+		matrixModel.rotate((float) Math.cos(Deferred.time * 0.8), new Vector3f(0, 1, 0));
+		matrixModel.scale(new Vector3f(
+				(float) Math.abs(Math.cos(Deferred.time)), 
+				(float) Math.abs(Math.cos(Deferred.time)), 
+				(float) Math.abs(Math.cos(Deferred.time))
+		));
 		useMatrix(matrixModel, "model");
 		VAOArray[1].render();
 	}
