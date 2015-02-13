@@ -53,8 +53,9 @@ void main() {
 			), 
 		0) * clamp(1 - shadow, 0, 1) * 5;
 		vec3 finalColor = blur + sun;
+		finalColor /= 3;
 		finalColor = pow(finalColor, vec3(1.0) / 2.2);
-    	color0 = vec4(((finalColor) / ((finalColor) + 1)), 1);
+    	color0 = vec4(finalColor, 1);
     }else {
     	color0 = vec4(blur, shadow);
     }

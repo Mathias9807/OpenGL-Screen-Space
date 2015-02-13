@@ -11,7 +11,7 @@ public class Light {
 	public static ArrayList<Light> lights = new ArrayList<Light>();
 	
 	public Vector3f pos;
-	public Vector3f diffuse;
+	public Vector3f diffuse, specular;
 	public float 	quadratic;
 	public boolean  isActive;
 	
@@ -29,6 +29,7 @@ public class Light {
 			setParam1f("light[" + i + "].quadratic", l.quadratic);
 			setParam3f("light[" + i + "].pos", l.pos.x, l.pos.y, l.pos.z);
 			setParam3f("light[" + i + "].diffuse", l.diffuse.x, l.diffuse.y, l.diffuse.z);
+			setParam3f("light[" + i + "].specular", l.specular.x, l.specular.y, l.specular.z);
 		}
 	}
 

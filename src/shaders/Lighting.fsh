@@ -30,15 +30,15 @@ void main() {
 	vec3 blinnPhong = vec3(tex1.rgb * 0.2);
 	vec3 diffuse = vec3(0);
 	
-	for (int i = 0; i < light.length(); i++) {
+	for (int i = 0; i < 8; i++) {
+		if (!light[i].isActive) continue;
 		vec4 pos = vec4(light[i].pos, 1);
-		pos = view * pos;
 		diffuse += max(
 			dot(
 				normal, 
 				normalize(pos.xyz)
 			), 
-		0);
+		0) * light[i].diffuse;
 	}
 	
 	blinnPhong += diffuse * tex1.rgb;

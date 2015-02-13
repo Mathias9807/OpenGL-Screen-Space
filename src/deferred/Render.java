@@ -12,7 +12,7 @@ import models.*;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.*;
 import org.lwjgl.util.vector.*;
 
 import textures.Textures;
@@ -28,6 +28,8 @@ public class Render {
 	private static VAO[] VAOArray = new VAO[8];
 	
 	public static Matrix4f matrixProj, matrixView, matrixModel;
+	
+	public static Light light;
 	
 	public static void initOpenGL() {
 		// Load models
@@ -99,12 +101,22 @@ public class Render {
 		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
 		glClearColor(0, 0, 0, 0);
+		
+		// Create light objects
+		light = new Light();
+		light.pos = new Vector3f(-2, 1, 2);
+		light.diffuse = new Vector3f(5, 0, 0);
+		light.specular = new Vector3f(1, 0, 0);
+		light.quadratic = 1;
+		light.isActive = true;
+		Light.lights.add(light);
 	}
 	
 	public static void renderOpenGL() {
 		setFrameBuffer(FBOData);
 		setShader(SHADERSplitter);
 		useMatrix(matrixView, "view");
+		setParam1f("time", (float) Deferred.time);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		
 		renderScene();
@@ -131,6 +143,8 @@ public class Render {
 		bind(FBOData.getTexturesId()[1], 1);
 		if (USE_BACK_FACES) 
 			bind(FBOBackFaces.getDepthTextureId(), 2);
+		Light.update();
+		setParam1f("time", (float) Deferred.time);
 		
 		glDisable(GL_DEPTH_TEST);
 		VAOArray[0].render();
@@ -163,10 +177,12 @@ public class Render {
 		glDisable(GL_DEPTH_TEST);
 		VAOArray[0].render();
 		glEnable(GL_DEPTH_TEST);
+		
+		
 	}
 	
 	private static void renderScene() {
-		bind(Textures.texID[0], 0);
+		bind(texID[0], 0);
 		matrixModel.setIdentity();
 		matrixModel.translate(new Vector3f(0, -0.5f, 0));
 		matrixModel.rotate((float) Math.PI * -0.5f, new Vector3f(1, 0, 0));
@@ -174,7 +190,7 @@ public class Render {
 		useMatrix(matrixModel, "model");
 		VAOArray[0].render();
 
-		bind(Textures.texID[0], 0);
+		bind(texID[0], 0);
 		matrixModel.setIdentity();
 		matrixModel.rotate((float) Math.cos(Deferred.time * 0.8), new Vector3f(1, 0, 0));
 		matrixModel.rotate((float) Math.cos(Deferred.time * 0.8), new Vector3f(0, 1, 0));

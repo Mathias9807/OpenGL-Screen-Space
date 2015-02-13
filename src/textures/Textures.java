@@ -42,7 +42,7 @@ public class Textures {
     	//Setup texture scaling filtering
     	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
     	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-		
+
 		return t;
 	}
 	

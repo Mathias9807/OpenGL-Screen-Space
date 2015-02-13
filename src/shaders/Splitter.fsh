@@ -9,15 +9,7 @@ in vec3 normal_m, normal_c;
 
 uniform sampler2D texture0;
 uniform mat4 proj, view, model;
-
-/*struct Light {
-	bool isActive;
-	vec3 pos;
-	vec3 diffuse;
-	vec3 specular;
-	float quadratic;
-};
-uniform Light light[8];*/
+uniform float time;
 
 
 void main() {

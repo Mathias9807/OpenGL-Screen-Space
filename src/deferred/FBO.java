@@ -10,8 +10,6 @@ import org.lwjgl.opengl.*;
 
 public class FBO {
 	
-	private static IntBuffer screenDrawBuffers = (IntBuffer) BufferUtils.createIntBuffer(1).put(GL_COLOR_ATTACHMENT0).flip();
-	
 	private int 	frameBufferID, 
 					depthBufferID, 
 					depthTextureID;
@@ -36,8 +34,8 @@ public class FBO {
 		
 		glBindTexture(GL_TEXTURE_2D, depthTextureID);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL14.GL_DEPTH_COMPONENT16, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (java.nio.ByteBuffer) null);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 		
