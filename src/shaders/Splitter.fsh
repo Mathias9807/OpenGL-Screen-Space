@@ -2,6 +2,7 @@
 
 layout(location = 0) out vec4 color0;
 layout(location = 1) out vec4 color1;
+layout(location = 2) out vec4 color2;
 
 in vec4 vertex_p, vertex_c, vertex_w;
 in vec2 uv_tan;
@@ -23,4 +24,5 @@ void main() {
     
     color0 = vec4(normal_iw, gl_FragCoord.z);
     color1 = vec4(pow(tex0.rgb, vec3(2.2)), 1);
+    color2 = vec4(vertex_w);
 }

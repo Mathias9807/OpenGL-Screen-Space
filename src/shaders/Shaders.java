@@ -10,7 +10,6 @@ public class Shaders {
 	
 	public static int SHADERSplitter	= load("Splitter");
 	public static int SHADERLighting	= load("Lighting");
-	public static int SHADERPost		= load("Post");
 	public static int SHADERBlurPass	= load("BlurPass");
 	public static int SHADERDepth		= load("Depth");
 	

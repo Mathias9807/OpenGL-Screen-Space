@@ -42,11 +42,12 @@ public class Deferred {
 			if (Display.isActive()) {
 				Render.renderOpenGL();
 				Display.update();
-				Display.sync(24);
+//				Display.sync(24);
 				fps++;
 			}
 			
-			System.out.println(org.lwjgl.util.glu.GLU.gluErrorString(GL11.glGetError()));
+			int error = GL11.glGetError();
+			if (error != GL11.GL_NO_ERROR) System.out.println(org.lwjgl.util.glu.GLU.gluErrorString(error));
 		}
 		Display.destroy();
 	}
@@ -58,7 +59,7 @@ public class Deferred {
 			.withProfileCore(true);
 		
 		try {
-			Display.setDisplayMode(Display.getAvailableDisplayModes()[2]);
+			Display.setDisplayMode(Display.getAvailableDisplayModes()[1]);
 			Display.setVSyncEnabled(true);
 			Display.setResizable(true);
 			Display.setTitle("Deferred Reflections");

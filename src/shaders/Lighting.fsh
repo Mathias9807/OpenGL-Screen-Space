@@ -5,7 +5,7 @@ layout(location = 1) out vec4 color1;
 
 in vec2 uv_tan;
 
-uniform sampler2D texture0, texture1, texture2;
+uniform sampler2D data0, data1, data2;
 uniform mat4 proj, view, projInv, viewInv;
 uniform bool useBackFaces;
 
@@ -20,11 +20,12 @@ vec4 get3DCoord(vec2 uv);
 
 
 void main() {
-	vec4 tex0 = texture(texture0, uv_tan), 
-		 tex1 = texture(texture1, uv_tan);
+	vec4 tex0 = texture(data0, uv_tan), 
+		 tex1 = texture(data1, uv_tan), 
+		 tex2 = texture(data2, uv_tan);
 	vec3 normal = tex0.rgb;
 	vec4 frag = get3DCoord(uv_tan);
-	vec4 frag_w = viewInv * frag;
+	vec4 frag_w = tex2;
 	
 	vec3 blinnPhong = vec3(tex1.rgb * 0.2);
 	vec3 diffuse = vec3(0);
@@ -32,23 +33,20 @@ void main() {
 	for (int i = 0; i < 8; i++) {
 		if (!light[i].isActive) continue;
 		vec4 light_w = vec4(light[i].pos, 1);
-		vec4 light_c = view * light_w;
-		vec4 pos = light_c - frag;
-		float dist = length(pos.xyz);
+		vec4 delta_w = light_w - frag_w;
+		float dist = length(delta_w.xyz);
 		
 		float falloff = 1 / (1 + dist * dist);
 		
 		diffuse += max(
 			dot(
-				(view * vec4(normal, 0)).xyz, 
-				pos.xyz / dist
+				normal, 
+				delta_w.xyz / dist
 			), 
 		0) * light[i].brightness * falloff;
 	}
 	
-	blinnPhong += diffuse * vec3(1);
-	
-	if (int(frag_w.x * 10) % 10 == 0) blinnPhong *= 0.5;
+	blinnPhong += diffuse * tex1.rgb;
 	
 	
 	float depth = tex0.a;
@@ -88,7 +86,7 @@ void main() {
 }
 
 vec4 get3DCoord(vec2 uv) {
-	float z = texture(texture0, uv).a;
+	float z = texture(data0, uv).a;
 	float x = uv.s * 2 - 1;
 	float y = uv.t * 2 - 1;
 	

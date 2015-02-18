@@ -32,7 +32,7 @@ public class Render {
 		Model.loadModels();
 		
 		// Load framebuffers
-		FBOData 		= new FBO(Display.getWidth(), Display.getHeight()).withColor(3).withDepth();
+		FBOData 		= new FBO(Display.getWidth(), Display.getHeight()).withColor(4).withDepth();
 		FBORender0 		= new FBO(Display.getWidth(), Display.getHeight()).withColor(3);
 		FBORender1 		= new FBO(Display.getWidth(), Display.getHeight()).withColor(3);
 		if (USE_BACK_FACES) 
@@ -78,9 +78,11 @@ public class Render {
 		useMatrix(matrixModel, "model");
 		
 		setShader(SHADERLighting);
-		setParam1i("texture0", 0);
-		setParam1i("texture1", 1);
+		setParam1i("data0", 0);
+		setParam1i("data1", 1);
+		setParam1i("data2", 2);
 		setParam1i("useBackFaces", USE_BACK_FACES ? 1 : 0);
+		useMatrix(Matrix4f.invert(matrixProj, null), "projInv");
 		useMatrix(matrixProj,  "proj");
 		useMatrix(matrixView,  "view");
 		
@@ -89,6 +91,7 @@ public class Render {
 		setParam1i("texture1", 1);
 		setParam1i("data0", 3);
 		setParam1i("data1", 4);
+		setParam1i("data2", 5);
 		useMatrix(matrixProj,  "proj");
 		useMatrix(matrixView,  "view");
 		
@@ -101,7 +104,7 @@ public class Render {
 		
 		// Create light objects
 		light = new Light();
-		light.pos = new Vector3f(0, 0, 0);
+		light.pos = new Vector3f(3, 1, 1);
 		light.brightness = new Vector3f(25, 0, 0);
 		light.isActive = true;
 		Light.lights.add(light);
@@ -133,11 +136,10 @@ public class Render {
 		setFrameBuffer(FBORender1);
 		setShader(SHADERLighting);
 		useMatrix(matrixView, "view");
-		useMatrix(matrixProj, "proj");
-		useMatrix(Matrix4f.invert(matrixProj, null), "projInv");
 		useMatrix(Matrix4f.invert(matrixView, null), "viewInv");
 		bind(FBOData.getTexturesId()[0], 0);
 		bind(FBOData.getTexturesId()[1], 1);
+		bind(FBOData.getTexturesId()[2], 2);
 		if (USE_BACK_FACES) 
 			bind(FBOBackFaces.getDepthTextureId(), 2);
 		Light.update();
@@ -154,9 +156,9 @@ public class Render {
 		bind(FBORender1.getTexturesId()[1], 1);
 		bind(FBOData.getTexturesId()[0], 3);
 		bind(FBOData.getTexturesId()[1], 4);
+		bind(FBOData.getTexturesId()[2], 5);
 		setParam2f("dir", 0, 1);
 		setParam1i("finalPass", 0);
-		useMatrix(matrixProj,  "proj");
 		useMatrix(matrixView,  "view");
 
 		glDisable(GL_DEPTH_TEST);
@@ -170,10 +172,10 @@ public class Render {
 		bind(FBORender0.getTexturesId()[1], 1);
 		bind(FBOData.getTexturesId()[0], 3);
 		bind(FBOData.getTexturesId()[1], 4);
+		bind(FBOData.getTexturesId()[2], 5);
 		setParam2f("dir", 1, 0);
 		setParam1i("finalPass", 1);
 		setParam1f("time", (float) Deferred.time);
-		useMatrix(matrixProj,  "proj");
 		useMatrix(matrixView,  "view");
 
 		glDisable(GL_DEPTH_TEST);
