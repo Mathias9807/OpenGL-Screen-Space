@@ -21,8 +21,8 @@ public class Textures {
 	public static void loadTextures() {
 		ArrayList<Integer> l = new ArrayList<Integer>();
 		{
-			l.add(load("wall.png"));
-			l.add(load("Bake.png"));
+			l.add(load("Stone.png", GL_LINEAR, GL12.GL_CLAMP_TO_EDGE));
+			l.add(load("Stone_normal.png", GL_LINEAR, GL12.GL_CLAMP_TO_EDGE));
 		}
 		Object[] transfer = l.toArray();
 		texID = new int[transfer.length];

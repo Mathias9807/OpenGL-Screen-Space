@@ -2,7 +2,6 @@ package deferred;
 
 import static deferred.FBO.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.*;
 import static shaders.Shaders.*;
 import static textures.Textures.*;
 
@@ -11,17 +10,14 @@ import java.nio.FloatBuffer;
 import models.*;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.*;
 import org.lwjgl.util.vector.*;
-
-import textures.Textures;
 
 public class Render {
 	
 	private static final boolean USE_BACK_FACES = false;
 	
-	private static int fov = 60;
+	private static int fov = 65;
 	
 	private static FBO FBOData, FBOBackFaces, FBORender0, FBORender1;
 
@@ -71,6 +67,7 @@ public class Render {
 		// Load shader uniforms
 		setShader(SHADERSplitter);
 		setParam1i("texture0", 0);
+		setParam1i("texture1", 1);
 		useMatrix(matrixProj,  "proj");
 		useMatrix(matrixView,  "view");
 		useMatrix(matrixModel, "model");
@@ -104,10 +101,8 @@ public class Render {
 		
 		// Create light objects
 		light = new Light();
-		light.pos = new Vector3f(-2, 1, 2);
-		light.diffuse = new Vector3f(5, 0, 0);
-		light.specular = new Vector3f(1, 0, 0);
-		light.quadratic = 1;
+		light.pos = new Vector3f(0, 0, 0);
+		light.brightness = new Vector3f(25, 0, 0);
 		light.isActive = true;
 		Light.lights.add(light);
 	}
@@ -126,6 +121,7 @@ public class Render {
 			setFrameBuffer(FBOBackFaces);
 			setShader(SHADERDepth);
 			useMatrix(matrixView, "view");
+			useMatrix(matrixProj, "proj");
 			
 			glClear(GL_DEPTH_BUFFER_BIT);
 			
@@ -133,12 +129,13 @@ public class Render {
 			renderScene();
 			glCullFace(GL_BACK);
 		}
-		
 
 		setFrameBuffer(FBORender1);
 		setShader(SHADERLighting);
 		useMatrix(matrixView, "view");
+		useMatrix(matrixProj, "proj");
 		useMatrix(Matrix4f.invert(matrixProj, null), "projInv");
+		useMatrix(Matrix4f.invert(matrixView, null), "viewInv");
 		bind(FBOData.getTexturesId()[0], 0);
 		bind(FBOData.getTexturesId()[1], 1);
 		if (USE_BACK_FACES) 
@@ -159,6 +156,8 @@ public class Render {
 		bind(FBOData.getTexturesId()[1], 4);
 		setParam2f("dir", 0, 1);
 		setParam1i("finalPass", 0);
+		useMatrix(matrixProj,  "proj");
+		useMatrix(matrixView,  "view");
 
 		glDisable(GL_DEPTH_TEST);
 		VAOArray[0].render();
@@ -173,25 +172,35 @@ public class Render {
 		bind(FBOData.getTexturesId()[1], 4);
 		setParam2f("dir", 1, 0);
 		setParam1i("finalPass", 1);
+		setParam1f("time", (float) Deferred.time);
+		useMatrix(matrixProj,  "proj");
+		useMatrix(matrixView,  "view");
 
 		glDisable(GL_DEPTH_TEST);
 		VAOArray[0].render();
 		glEnable(GL_DEPTH_TEST);
-		
-		
 	}
 	
 	private static void renderScene() {
 		bind(texID[0], 0);
+		bind(texID[1], 1);
 		matrixModel.setIdentity();
 		matrixModel.translate(new Vector3f(0, -0.5f, 0));
 		matrixModel.rotate((float) Math.PI * -0.5f, new Vector3f(1, 0, 0));
 		matrixModel.scale(new Vector3f(4f, 4f, 4f));
 		useMatrix(matrixModel, "model");
 		VAOArray[0].render();
+		
 
-		bind(texID[0], 0);
 		matrixModel.setIdentity();
+		matrixModel.translate(new Vector3f(0, -0.5f, 0));
+		matrixModel.scale(new Vector3f(4f, 4f, 4f));
+		useMatrix(matrixModel, "model");
+		VAOArray[0].render();
+
+		
+		matrixModel.setIdentity();
+		matrixModel.translate(new Vector3f(0, 2, 2));
 		matrixModel.rotate((float) Math.cos(Deferred.time * 0.8), new Vector3f(1, 0, 0));
 		matrixModel.rotate((float) Math.cos(Deferred.time * 0.8), new Vector3f(0, 1, 0));
 		matrixModel.scale(new Vector3f(

@@ -11,6 +11,7 @@ uniform mat4 proj, view;
 uniform vec2 dir;
 uniform float radius = 4, scaling = 1;
 uniform bool finalPass;
+uniform float time;
 
 void main() {
 	vec4 tex0 = texture(texture0, uv_tan), 
@@ -51,8 +52,8 @@ void main() {
 				normal, 
 				normalize(vec3(1))
 			), 
-		0) * clamp(1 - shadow, 0, 1) * 5;
-		vec3 finalColor = blur + sun;
+		0) * clamp(1 - shadow, 0, 1) * 1;
+		vec3 finalColor = blur;
 		finalColor /= 3;
 		finalColor = pow(finalColor, vec3(1.0) / 2.2);
     	color0 = vec4(finalColor, 1);

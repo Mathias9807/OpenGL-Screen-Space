@@ -42,6 +42,7 @@ public class Deferred {
 			if (Display.isActive()) {
 				Render.renderOpenGL();
 				Display.update();
+				Display.sync(24);
 				fps++;
 			}
 			
