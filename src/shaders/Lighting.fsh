@@ -11,8 +11,11 @@ uniform bool useBackFaces;
 
 struct Light {
 	bool isActive;
-	vec3 pos;
+	vec4 pos;
 	vec3 brightness;
+	
+	bool usesShadowMap;
+	sampler2D shadowMap;
 };
 uniform Light light[8];
 
@@ -32,16 +35,24 @@ void main() {
 	
 	for (int i = 0; i < 8; i++) {
 		if (!light[i].isActive) continue;
-		vec4 light_w = vec4(light[i].pos, 1);
-		vec4 delta_w = light_w - frag_w;
-		float dist = length(delta_w.xyz);
+		vec4 light_w = light[i].pos;
 		
-		float falloff = 1 / (1 + dist * dist);
+		vec3 delta_w;
+		float dist = 1;
+		float falloff = 1;
+		if (light_w.w == 1) {
+			delta_w = (light_w - frag_w).xyz;
+			dist = length(delta_w.xyz);
+			falloff = 1 / (1 + dist * dist);
+		}else {
+			delta_w = light_w.xyz;
+		}
+		
 		
 		diffuse += max(
 			dot(
 				normal, 
-				delta_w.xyz / dist
+				delta_w / dist
 			), 
 		0) * light[i].brightness * falloff;
 	}

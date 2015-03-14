@@ -73,8 +73,6 @@ public class Render {
 		useMatrix(matrixModel, "model");
 		
 		setShader(SHADERDepth);
-		useMatrix(matrixProj,  "proj");
-		useMatrix(matrixView,  "view");
 		useMatrix(matrixModel, "model");
 		
 		setShader(SHADERLighting);
@@ -104,7 +102,7 @@ public class Render {
 		
 		// Create light objects
 		light = new Light();
-		light.pos = new Vector3f(3, 1, 1);
+		light.pos = (Vector4f) new Vector4f(-1, 1, 0.5f, 0).normalise();
 		light.brightness = new Vector3f(25, 0, 0);
 		light.isActive = true;
 		Light.lights.add(light);

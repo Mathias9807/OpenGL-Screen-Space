@@ -2,8 +2,8 @@
 
 layout(location = 0) in vec3 vertex_in;
 
-uniform mat4 proj, view, model;
+uniform mat4 shadowMat, model;
 
 void main() {
-    gl_Position = proj * view * model * vec4(vertex_in, 1);
+    gl_Position = shadowMat * model * vec4(vertex_in, 1);
 }

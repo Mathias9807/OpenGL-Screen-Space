@@ -1,7 +1,7 @@
 package deferred;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.*;
 
 public class Panel {
 	
@@ -25,10 +25,6 @@ public class Panel {
 		Render.matrixView.rotate(rot.x, new Vector3f(1, 0, 0));
 		Render.matrixView.rotate(rot.y, new Vector3f(0, 1, 0));
 		Render.matrixView.translate(pos);
-		
-		Light l = Light.lights.get(0);
-		l.pos.x = (float) Math.cos(Deferred.time) * 3;
-		l.pos.y = (float) Math.sin(Deferred.time) * 3;
 	}
 	
 }
